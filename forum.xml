@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<forum>
+    <persons>
+        <person ref="p1">
+            <lastname>Dupont</lastname>
+            <firstname>Charles</firstname>
+            <email>charles.ingals@lapetitemaison.fr</email>
+        </person>
+        <person ref="p2">
+            <lastname>Dupont</lastname>
+            <firstname>Marie</firstname>
+            <email>Marie.ingals@lapetitemaison.fr</email>
+        </person>
+        <person ref="p3">
+            <lastname>Dupont</lastname>
+            <firstname>Laura</firstname>
+            <email>Laura.ingals@lapetitemaison.fr</email>
+        </person>
+    </persons>
+    <messages>
+        <message ref="m1" sender="p1">
+            Hello
+        </message>
+        <message ref="m2" sender="p3">
+            Hi
+        </message>
+        <message ref="m3" sender="p2" reply-to="m1">
+            Hello ! How are you ?
+        </message>
+        <message ref="m4" sender="p1" reply-to="m3">
+            Fine ! I am going to cut some firewood for the camp.
+        </message>
+        <message ref="m5" sender="p3" reply-to="m3">
+            Fine, I am going to school
+        </message>
+        <message ref="m6" sender="p3" reply-to="m4">
+            I am cooking
+        </message>
+        <message ref="m7" sender="p2" reply-to="m4">
+            I am cleaning up the camp
+        </message>
+        <message ref="m8" sender="p1" reply-to="m2">
+            Hi ! would you like to join us ?
+        </message>
+        <message ref="m9" sender="p1">
+            Bye
+        </message>
+    </messages>
+</forum>
