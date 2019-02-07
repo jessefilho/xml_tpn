@@ -29,7 +29,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 public class FilmParsing {
-	
+
 	private static String filmTitle =  "The Lord of the Rings: The Return of the King"; //le titre du film loué
 	private static String lastName = "Nascimento Filho"; //nom du locataire
 	private static String firstName = "Jesse"; //prénom du locataire
@@ -49,7 +49,7 @@ public class FilmParsing {
 		//la hierarchie d'objet crée  pendant le parsing
 		Document document = builder.parse(f);
 
-		
+
 
 		System.out.println(" ");
 		System.out.println(" ");
@@ -59,8 +59,8 @@ public class FilmParsing {
 
 	}
 	private static void userInteration(Document document) throws TransformerException {
-		
-		
+
+
 		TransformerFactory tFactory = TransformerFactory.newInstance();
 		Transformer transformer = tFactory.newTransformer();
 		DOMSource source = new DOMSource(document);
@@ -70,7 +70,7 @@ public class FilmParsing {
 
 		//Manipulation des noueds
 		Element root = document.getDocumentElement();
-		
+
 		System.out.println(" ");
 		System.out.println(" #*#*#*#*#*#*#*#*# Make a Choose #*#*#*#*#*#*#*#*#");
 		System.out.println("Enter with your choose: ");
@@ -170,7 +170,7 @@ public class FilmParsing {
 		String expressionRent = "//DVD";
 		NodeList nlistOfTitles = null;
 		NodeList nlistOfRents = null;
-		
+
 		try {
 			//List of titles
 			System.out.println("List of titles with xPath:");
@@ -219,7 +219,7 @@ public class FilmParsing {
 
 
 	}
-	
+
 	private static void modficationRent(Element root,
 			Document doc, //le DOM
 			String filmTitle, //le titre du film loué
@@ -228,52 +228,53 @@ public class FilmParsing {
 			String address, //adresse du locataire
 			String date//date de retour
 			) throws XPathExpressionException{
+		System.out.println("Modf Method");
 		XPathFactory xpathFactory = XPathFactory.newInstance();
 		XPath path = xpathFactory.newXPath();
 		String expressionDVDs = "//DVD";
 		NodeList nlistOfDVD = (NodeList)path.evaluate(expressionDVDs, root,XPathConstants.NODESET);
-			
+
 		for (int i = 0; i < nlistOfDVD.getLength(); i++) {
-			
+
 			String title = nlistOfDVD.item(i).getChildNodes().item(1).getChildNodes().item(1).getChildNodes().item(0).getNodeValue();
-			
+
 			if (filmTitle.equals(title)) {
 				System.out.println(title);
 				try {
 					Element rent = doc.createElement("rent");
-					 
+
 					Element person = doc.createElement("person");
-					
+
 					Text lastNameValue = doc.createTextNode(lastName); 
 					Element lastNameEl = doc.createElement("lastName");
-					
+
 					Text firstNameValue = doc.createTextNode(firstName); 
 					Element firstNameEl = doc.createElement("firstName");
-					
+
 					Text addressValue = doc.createTextNode(address); 
 					Element addressEl = doc.createElement("address");
-					
+
 					lastNameEl.appendChild(lastNameValue);
 					firstNameEl.appendChild(firstNameValue);
 					addressEl.appendChild(addressValue);
-					
+
 					person.appendChild(lastNameEl);
 					person.appendChild(firstNameEl);
 					person.appendChild(addressEl);
-					
+
 					rent.setAttribute("date", date);
 					rent.appendChild(person);
-					
+
 					nlistOfDVD.item(i).getChildNodes().item(3).getParentNode().insertBefore(rent, nlistOfDVD.item(i).getChildNodes().item(3));
-					
+
 				} catch (NullPointerException e) {
 					e.getStackTrace();
 				}
-				
-				
+
+
 			}
 		}
-		
+
 		Transformer transformer = null;
 		try {
 			transformer = TransformerFactory.newInstance().newTransformer();
@@ -297,6 +298,42 @@ public class FilmParsing {
 
 		String xmlOutput = result.getWriter().toString();
 		System.out.println(xmlOutput);
-		
+
+	}
+	public void userInterationTest(Document document) throws TransformerConfigurationException {
+
+		Element root = document.getDocumentElement();
+		System.out.println(" ");
+		System.out.println(" ");
+		listActeurs(root);
+		System.out.println(" ");
+		System.out.println(" ");
+		datesRetour(root);
+		System.out.println(" ");
+		System.out.println(" ");
+		try {
+			xPathFunction(root);
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(" ");
+		System.out.println(" ");
+
+		try {
+			modficationRent(root,
+					document,
+					filmTitle,
+					lastName,
+					firstName,
+					address,
+					date);
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(" ");
+		System.out.println(" ");
+
 	}
 }
