@@ -1,13 +1,19 @@
 package TPDOM.TPDOM;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.lang.invoke.ConstantCallSite;
 import java.util.Scanner;
 
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -20,8 +26,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 public class FilmParsing {
+	
+	private static String filmTitle =  "The Lord of the Rings: The Return of the King"; //le titre du film loué
+	private static String lastName = "Nascimento Filho"; //nom du locataire
+	private static String firstName = "Jesse"; //prénom du locataire
+	private static String address = "Street 54"; //adresse du locataire
+	private static String date = "07/02/2019";//date de retour  
 	public static void main(String[] args) throws Exception {
 		File f = new File("dvd.xml");
 
@@ -36,42 +49,46 @@ public class FilmParsing {
 		//la hierarchie d'objet crée  pendant le parsing
 		Document document = builder.parse(f);
 
-		TransformerFactory tFactory = TransformerFactory.newInstance();
-		Transformer transformer = tFactory.newTransformer();
-		DOMSource source = new DOMSource(document);
-
-		StreamResult result =  new StreamResult(System.out);
-		transformer.transform(source, result);
-
-		//Manipulation des noueds
-		Element root = document.getDocumentElement();
+		
 
 		System.out.println(" ");
 		System.out.println(" ");
 		System.out.println("---------- START ----------");
-		userInteration(root);
+		userInteration(document);
 		System.out.println("finish...");
 
 	}
-	private static void userInteration(Element root) {
+	private static void userInteration(Document document) throws TransformerException {
+		
+		
+		TransformerFactory tFactory = TransformerFactory.newInstance();
+		Transformer transformer = tFactory.newTransformer();
+		DOMSource source = new DOMSource(document);
+
+		//StreamResult result =  new StreamResult(System.out.);
+		//transformer.transform(source, result);
+
+		//Manipulation des noueds
+		Element root = document.getDocumentElement();
+		
 		System.out.println(" ");
 		System.out.println(" #*#*#*#*#*#*#*#*# Make a Choose #*#*#*#*#*#*#*#*#");
 		System.out.println("Enter with your choose: ");
 		System.out.println("1 - List of actors;");
 		System.out.println("2 - Return dates;");
 		System.out.println("3 - xPath;");
+		System.out.println("4 - Modify DVD`s Rent;");
 		System.out.println("99 - To exit;");
-
 		Scanner scanner = new Scanner(System.in);
 
 		switch (scanner.nextInt()) {
 		case 1:
 			;
 			listActeurs(root);
-			userInteration(root);
+			userInteration(document);
 		case 2:
 			datesRetour(root);
-			userInteration(root);
+			userInteration(document);
 		case 3:
 			try {
 				xPathFunction(root);
@@ -79,7 +96,21 @@ public class FilmParsing {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			userInteration(root);
+			userInteration(document);
+		case 4:
+			try {
+				modficationRent(root,
+						document,
+						filmTitle,
+						lastName,
+						firstName,
+						address,
+						date);
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			userInteration(document);
 
 		case 99:
 			break;
@@ -180,12 +211,92 @@ public class FilmParsing {
 			}
 
 
-		} catch (XPathExpressionException e) {
+		} catch (XPathExpressionException e) {	
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//System.out.println(str);
 
 
+	}
+	
+	private static void modficationRent(Element root,
+			Document doc, //le DOM
+			String filmTitle, //le titre du film loué
+			String lastName, //nom du locataire
+			String firstName, //prénom du locataire
+			String address, //adresse du locataire
+			String date//date de retour
+			) throws XPathExpressionException{
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		XPath path = xpathFactory.newXPath();
+		String expressionDVDs = "//DVD";
+		NodeList nlistOfDVD = (NodeList)path.evaluate(expressionDVDs, root,XPathConstants.NODESET);
+			
+		for (int i = 0; i < nlistOfDVD.getLength(); i++) {
+			
+			String title = nlistOfDVD.item(i).getChildNodes().item(1).getChildNodes().item(1).getChildNodes().item(0).getNodeValue();
+			
+			if (filmTitle.equals(title)) {
+				System.out.println(title);
+				try {
+					Element rent = doc.createElement("rent");
+					 
+					Element person = doc.createElement("person");
+					
+					Text lastNameValue = doc.createTextNode(lastName); 
+					Element lastNameEl = doc.createElement("lastName");
+					
+					Text firstNameValue = doc.createTextNode(firstName); 
+					Element firstNameEl = doc.createElement("firstName");
+					
+					Text addressValue = doc.createTextNode(address); 
+					Element addressEl = doc.createElement("address");
+					
+					lastNameEl.appendChild(lastNameValue);
+					firstNameEl.appendChild(firstNameValue);
+					addressEl.appendChild(addressValue);
+					
+					person.appendChild(lastNameEl);
+					person.appendChild(firstNameEl);
+					person.appendChild(addressEl);
+					
+					rent.setAttribute("date", date);
+					rent.appendChild(person);
+					
+					nlistOfDVD.item(i).getChildNodes().item(3).getParentNode().insertBefore(rent, nlistOfDVD.item(i).getChildNodes().item(3));
+					
+				} catch (NullPointerException e) {
+					e.getStackTrace();
+				}
+				
+				
+			}
+		}
+		
+		Transformer transformer = null;
+		try {
+			transformer = TransformerFactory.newInstance().newTransformer();
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+		StreamResult result = new StreamResult(new StringWriter());
+		DOMSource source = new DOMSource(doc);
+		try {
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String xmlOutput = result.getWriter().toString();
+		System.out.println(xmlOutput);
+		
 	}
 }
